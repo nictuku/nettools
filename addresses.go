@@ -2,6 +2,7 @@ package nettools
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -10,49 +11,27 @@ func BinaryToDottedPort(port string) string {
 		(uint16(port[4])<<8)|uint16(port[5]))
 }
 
-var (
-	m = make(map[string]byte, 256)
-	n = make(map[string]uint16, 65536)
-)
-
-func init() {
-	var (
-		i byte
-		j uint16
-	)
-
-	for i = 0; i < 255; i++ {
-		s := fmt.Sprintf("%d", i)
-		m[s] = i
-	}
-	i++
-	s := fmt.Sprintf("%d", i)
-	m[s] = i
-	for j = 0; j < 65535; j++ {
-		s := fmt.Sprintf("%d", j)
-		n[s] = j
-	}
-	j++
-	s = fmt.Sprintf("%d", j)
-	n[s] = j
-
-}
-
 // 97.98.99.100:25958 becames "abcdef".
 func DottedPortToBinary(b string) string {
 	a := make([]byte, 6, 6)
 
 	son := [4]string{".", ".", ".", ":"}
 	endpos := len(b)
-	beginpos := 0
-	for i := 0; i < 4; i++ {
-		p1 := strings.Index(b[beginpos:endpos], son[i])
-		a[i] = m[b[beginpos:(beginpos+p1)]]
-		beginpos = beginpos + p1 + 1
+	beginPos := 0
+
+	// IP.
+	for i := 0; i < len(son); i++ {
+		p1 := strings.Index(b[beginPos:endpos], son[i])
+		aa, _ := strconv.ParseUint(b[beginPos:(beginPos+p1)], 10, 8)
+		a[i] = byte(aa)
+		beginPos = beginPos + p1 + 1
 	}
-	c := n[b[beginpos:]]
-	a[4] = uint8(c >> 8)
-	a[5] = uint8(c)
+
+	// Port.
+	aa, _ := strconv.ParseUint(b[beginPos:], 10, 16)
+	c := uint16(aa)
+	a[4] = byte(c >> 8)
+	a[5] = byte(c)
 
 	return string(a)
 }

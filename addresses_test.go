@@ -27,4 +27,4 @@ func BenchmarkDottedPort(t *testing.B) {
 
 // # MacBookAir 1.7Ghz i5
 // $ go test -bench=.*
-// BenchmarkDottedPort	  500000	      6645 ns/op
+// BenchmarkDottedPort	 2000000	       876 ns/op

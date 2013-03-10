@@ -11,7 +11,7 @@ func BinaryToDottedPort(port string) string {
 		(uint16(port[4])<<8)|uint16(port[5]))
 }
 
-// 97.98.99.100:25958 becames "abcdef".
+// 97.98.99.100:25958 becames "abcdef" or an empty string if the input is invalid.
 func DottedPortToBinary(b string) string {
 	a := make([]byte, 6, 6)
 
@@ -22,6 +22,9 @@ func DottedPortToBinary(b string) string {
 	// IP.
 	for i := 0; i < len(son); i++ {
 		p1 := strings.Index(b[beginPos:endpos], son[i])
+		if p1 == -1 {
+			return ""
+		}
 		aa, _ := strconv.ParseUint(b[beginPos:(beginPos+p1)], 10, 8)
 		a[i] = byte(aa)
 		beginPos = beginPos + p1 + 1

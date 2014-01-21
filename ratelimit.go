@@ -29,6 +29,15 @@ type ClientThrottle struct {
 	// Hosts that get blocked once go to a separate cache, and stay forever
 	// until they stop hitting us enough to fall off the blocked cache.
 	blocked *cache.LRUCache
+
+	// This channel will be closed when the ClientThrottle should be stopped.
+	stop chan bool
+}
+
+// Stops the ClientThrottle and all internal goroutines.
+func (r *ClientThrottle) Stop() {
+	close(r.stop)
+
 }
 
 func (r *ClientThrottle) CheckBlock(host string) bool {
@@ -62,17 +71,22 @@ func (r *ClientThrottle) cleanup() {
 	// Check the bucket faster than the rate period, to reduce the pressure in the cache.
 	t := time.Tick(5 * time.Second)
 
-	// This is ridiculously inefficient but it'll have to do for now.
-	for _ = range t {
-		var h hits
-		for _, item := range r.c.Items() {
-			h = item.Value.(hits) + 5
-			if h > 60 {
-				// Reduce pressure in the LRU.
-				r.c.Delete(item.Key)
-			} else {
-				r.c.Set(item.Key, h)
+	for {
+		select {
+		case <-t:
+			var h hits
+			// This is ridiculously inefficient but it'll have to do for now.
+			for _, item := range r.c.Items() {
+				h = item.Value.(hits) + 5
+				if h > 60 {
+					// Reduce pressure in the LRU.
+					r.c.Delete(item.Key)
+				} else {
+					r.c.Set(item.Key, h)
+				}
 			}
+		case <-r.stop:
+			return
 		}
 	}
 }

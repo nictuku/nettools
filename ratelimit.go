@@ -15,6 +15,7 @@ func NewThrottler() *ClientThrottle {
 	r := ClientThrottle{
 		c:       cache.NewLRUCache(maxHosts),
 		blocked: cache.NewLRUCache(maxHosts),
+		stop:    make(chan bool),
 	}
 	go r.cleanup()
 	return &r

@@ -4,7 +4,12 @@ import (
 	"testing"
 )
 
-var dottedPortTests = map[string]string{"97.98.99.100:25958": "abcdef"}
+var dottedPortTests = map[string]string{
+	"97.98.99.100:25958":                              "abcdef",
+	"[6162:6364:6566:6768:6970:7172:7374:7576]:25958": "abcdefghipqrstuvef",
+	"[6162:64:6566:6768:6970:7172:7374:7576]:25958":   "ab\x00defghipqrstuvef",
+	"[6162:0064:6566:6768:6970:7172:7374:7576]:25958": "ab\x00defghipqrstuvef",
+}
 
 func TestDottedPort(t *testing.T) {
 	for k, v := range dottedPortTests {

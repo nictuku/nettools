@@ -2,8 +2,8 @@ package nettools
 
 import (
 	"fmt"
+	"net"
 	"strconv"
-	"strings"
 )
 
 func BinaryToDottedPort(port string) string {
@@ -13,28 +13,24 @@ func BinaryToDottedPort(port string) string {
 
 // 97.98.99.100:25958 becames "abcdef" or an empty string if the input is invalid.
 func DottedPortToBinary(b string) string {
-	a := make([]byte, 6, 6)
-
-	son := [4]string{".", ".", ".", ":"}
-	endpos := len(b)
-	beginPos := 0
-
-	// IP.
-	for i := 0; i < len(son); i++ {
-		p1 := strings.Index(b[beginPos:endpos], son[i])
-		if p1 == -1 {
-			return ""
-		}
-		aa, _ := strconv.ParseUint(b[beginPos:(beginPos+p1)], 10, 8)
-		a[i] = byte(aa)
-		beginPos = beginPos + p1 + 1
+	var a []uint8
+	host, port, _ := net.SplitHostPort(b)
+	ip := net.ParseIP(host)
+	if ip == nil {
+		return ""
 	}
-
-	// Port.
-	aa, _ := strconv.ParseUint(b[beginPos:], 10, 16)
+	aa, _ := strconv.ParseUint(port, 10, 16)
 	c := uint16(aa)
-	a[4] = byte(c >> 8)
-	a[5] = byte(c)
-
-	return string(a)
+	if ip2 := net.IP.To4(ip); ip2 != nil {
+		a = make([]byte, net.IPv4len+2, net.IPv4len+2)
+		copy(a, ip2[0:net.IPv4len]) // ignore bytes IPv6 bytes if it's IPv4.
+		a[4] = byte(c >> 8)
+		a[5] = byte(c)
+	} else {
+		a = make([]byte, net.IPv6len+2, net.IPv6len+2)
+		copy(a, ip)
+		a[16] = byte(c >> 8)
+		a[17] = byte(c)
+	}
+	return (string(a))
 }

@@ -21,18 +21,16 @@ func DottedPortToBinary(b string) string {
 	}
 	aa, _ := strconv.ParseUint(port, 10, 16)
 	c := uint16(aa)
-	high := byte(c >> 8)
-	low := byte(c)
 	if ip2 := net.IP.To4(ip); ip2 != nil {
 		a = make([]byte, net.IPv4len+2, net.IPv4len+2)
 		copy(a, ip2[0:net.IPv4len])
-		a[4] = high
-		a[5] = low
+		a[4] = byte(c >> 8)
+		a[5] = byte(c)
 	} else {
 		a = make([]byte, net.IPv6len+2, net.IPv6len+2)
 		copy(a[0:], ip[0:net.IPv6len])
-		a[16] = high
-		a[17] = low
+		a[16] = byte(c >> 8)
+		a[17] = byte(c)
 	}
 	return (string(a))
 }

@@ -10,10 +10,12 @@ func BinaryToDottedPort(port string) string {
 	if len(port) == 6 {
 		return fmt.Sprintf("%d.%d.%d.%d:%d", port[0], port[1], port[2], port[3],
 		(uint16(port[4])<<8)|uint16(port[5]))
-	} else {
+	} else if len(port) == 18 {
 		b := []byte(port[:16])
 		return fmt.Sprintf("[%s]:%d", net.IP.String(b),
 		(uint16(port[16])<<8)|uint16(port[17]))
+	} else {
+		return ""
 	}
 }
 

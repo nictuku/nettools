@@ -7,12 +7,14 @@ import (
 )
 
 func BinaryToDottedPort(port string) string {
-	if len(string) == 6 {
+	if len(port) == 6 {
 		return fmt.Sprintf("%d.%d.%d.%d:%d", port[0], port[1], port[2], port[3],
 		(uint16(port[4])<<8)|uint16(port[5]))
 	} else {
-		return fmt.Sprintf("[%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x]:%d", port[0], port[1], port[2], port[3],port[4],port[5],
-		port[6],port[7],(uint16(port[8])<<8)|uint16(port[9]))
+		return fmt.Sprintf("[%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x]:%d", 
+		port[0], port[1], port[2], port[3],port[4],port[5],port[6],port[7],
+		port[8], port[9], port[10], port[11],port[12],port[13],port[14],port[15],
+		(uint16(port[16])<<8)|uint16(port[17]))
 	}
 }
 

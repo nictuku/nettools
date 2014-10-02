@@ -8,12 +8,6 @@ var dottedPortTests = map[string]string{
 	"97.98.99.100:25958":                              "abcdef",
 	"[6162:6364:6566:6768:6970:7172:7374:7576]:25958": "abcdefghipqrstuvef",
 	"[6162:64:6566:6768:6970:7172:7374:7576]:25958":   "ab\x00defghipqrstuvef",
-	"[6162:0064:6566:6768:6970:7172:7374:7576]:25958": "ab\x00defghipqrstuvef",
-}
-
-var BinaryToDottedPortTests = map[string]string{
-	"abcdef":						"97.98.99.100:25958",
-	"abcdefghipqrstuvef":		"[6162:6364:6566:6768:6970:7172:7374:7576]:25958",
 }
 
 func TestDottedPort(t *testing.T) {
@@ -26,10 +20,10 @@ func TestDottedPort(t *testing.T) {
 }
 
 func TestBinaryToDottedPort(t *testing.T) {
-	for k, v := range BinaryToDottedPortTests {
-		s := BinaryToDottedPort(k)
-		if s != v {
-			t.Fatalf("BinaryToDottedPort got %v wanted %v", s, v)
+	for k, v := range dottedPortTests {
+		s := BinaryToDottedPort(v)
+		if s != k {
+			t.Fatalf("BinaryToDottedPort got %v wanted %v", s, k)
 		}
 	}
 }

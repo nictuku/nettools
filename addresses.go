@@ -7,9 +7,15 @@ import (
 )
 
 func BinaryToDottedPort(port string) string {
-	return fmt.Sprintf("%d.%d.%d.%d:%d", port[0], port[1], port[2], port[3],
+	if len(string) == 6 {
+		return fmt.Sprintf("%d.%d.%d.%d:%d", port[0], port[1], port[2], port[3],
 		(uint16(port[4])<<8)|uint16(port[5]))
+	} else {
+		return fmt.Sprintf("[%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x]:%d", port[0], port[1], port[2], port[3],port[4],port[5],
+		port[6],port[7],(uint16(port[8])<<8)|uint16(port[9]))
+	}
 }
+
 
 // 97.98.99.100:25958 becames "abcdef" or an empty string if the input is invalid.
 func DottedPortToBinary(b string) string {

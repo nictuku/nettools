@@ -6,16 +6,15 @@ import (
 	"github.com/youtube/vitess/go/cache"
 )
 
-const (
-	maxPerMinute = 10
-	maxHosts     = 1000
-)
-
-func NewThrottler() *ClientThrottle {
+// NewThrottle creates a new client throttler that blocks spammy clients.
+// UPDATED in 2015-01-17: clients now have to specify the limits. Use 10 and
+// 1000 if you want to use the old default values.
+func NewThrottler(maxPerMinute int, maxHosts int64) *ClientThrottle {
 	r := ClientThrottle{
-		c:       cache.NewLRUCache(maxHosts),
-		blocked: cache.NewLRUCache(maxHosts),
-		stop:    make(chan bool),
+		maxPerMinute: maxPerMinute,
+		c:            cache.NewLRUCache(maxHosts),
+		blocked:      cache.NewLRUCache(maxHosts),
+		stop:         make(chan bool),
 	}
 	go r.cleanup()
 	return &r
@@ -24,6 +23,8 @@ func NewThrottler() *ClientThrottle {
 // ClientThrottle identifies and blocks hosts that are too spammy. It only
 // cares about the number of operations per minute.
 type ClientThrottle struct {
+	maxPerMinute int
+
 	// Rate limiter.
 	c *cache.LRUCache
 
@@ -55,7 +56,8 @@ func (r *ClientThrottle) CheckBlock(host string) bool {
 	} else {
 		h = v.(hits) - 1
 	}
-	if h < 60-maxPerMinute {
+	if int(h) < 60-r.maxPerMinute {
+		// fmt.Printf("blocking because int(h)=%v < 60-r.maxPerMinute = (60-%v) => %v\n", int(h), r.maxPerMinute, 60-r.maxPerMinute)
 		r.c.Set(host, h-300)
 		// New bad guy.
 		r.blocked.Set(host, h) // The value here is not relevant.

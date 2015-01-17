@@ -3,7 +3,7 @@ package nettools
 import (
 	"time"
 
-	"code.google.com/p/vitess/go/cache"
+	"github.com/youtube/vitess/go/cache"
 )
 
 const (
